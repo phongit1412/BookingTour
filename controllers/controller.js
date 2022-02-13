@@ -1,7 +1,6 @@
 const usermodel = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const accessTokenSecret = process.env.SECRETKEY;
 const secret = process.env.secret_user;
 
@@ -82,9 +81,8 @@ exports.authLogin = async(req, res) => {
                         return res.status(401).json({ message: "Pending Account. Please Verify Your Email!" })
                     } else {
                         var id = user.id;
-                        var validPassword = await bcrypt.compare(password, user.passWord);
+                        var validPassword = null
                         if (validPassword) {
-                            var token = await jwt.sign({ id }, secret, { expiresIn: 60 * 90 })
                             res.status(200).json({ message: "Valid password", token: token });
                         } else {
                             res.status(400).json({ message: "Invalid Password" });
@@ -127,7 +125,6 @@ exports.authRegister = async(req, res) => {
                         if (err) {
                             res.status(500).json({ msg: "Email exist" });
                         } else {
-                            sendConfirmationEmail(address_mail_company, mail, tokenMail);
                             res.status(200).json({ msg: "Success" });
                         }
                     });
@@ -159,22 +156,4 @@ find_user = ({ username }, callback) => {
         }
     })
 };
-var transport = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: address_mail_company,
-        pass: address_mail_company_pass,
-    },
-});
-sendConfirmationEmail = (user, email, token) => {
-    transport.sendMail({
-        from: user,
-        to: email,
-        subject: "Please confirm your account",
-        html: `<h1>VietNam Touris Company</h1>
-        <h3>Email Confirmation</h3>
-        <p>Thank you for subscribing. Please confirm your email by clicking on the following link</p>
-        <a href="http://localhost:3000/user/active/${token}">click here</a>
-          </div>`,
-    }).catch(err => console.log(err));
-};
+
