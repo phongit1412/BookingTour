@@ -34,41 +34,10 @@ exports.getTour = (req, res) => {
 exports.getListUserBookingTour = (req, res) => {
         var id = req.params.tour_id;
         var list = [];
-        booking.find({ tour_id: id }).populate('user_id').exec(function(err, data) {
-            if (err) return res.render("views/Error404");
-            if (data[0] == null) {
-                return res.render("admin/noTours");
-            } else {
-                data.forEach(element => {
-                    var item = {
-                        "name": element.user_id.full_name,
-                        "sdt": element.user_id.sdt,
-                        "email": element.user_id.email,
-                        "date": element.dateDeparture,
-                        "adult": element.adult,
-                        "children": element.children,
-                        "payment": element.payment
-                    }
-                    list.push(item);
-                });
-                return res.render("admin/listCustommer", { msg: "success", user: list, moment: moment });
-            }
-        });
     }
     //get
 exports.authCookies = (req, res) => {
-    try {
-        var token = req.cookies.token;
-        jwt.verify(token, secret, (err, data) => {
-            if (err) {
-                return res.redirect("/admin/login");
-            } else {
-                res.render('admin/manager');
-            }
-        })
-    } catch (error) {
-        return res.render("views/Error404");
-    }
+
 };
 //post
 exports.authLogin = async(req, res) => {
@@ -81,9 +50,9 @@ exports.authLogin = async(req, res) => {
             } else {
                 if (user) {
                     var id = user.id;
-                    var validPassword = await bcrypt.compare(password, user.password);
+                    var validPassword = null
                     if (validPassword) {
-                        var token = await jwt.sign({ id }, secret, { expiresIn: 60 * 90 })
+                        var token = null
                         res.status(200).json({ message: "Valid password", token: token });
                     } else {
                         res.status(400).json({ message: "Invalid Password" });
